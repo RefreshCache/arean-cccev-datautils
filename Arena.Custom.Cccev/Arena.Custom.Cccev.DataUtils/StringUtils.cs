@@ -4,10 +4,16 @@
 * Date Created:	???
 *
 * $Workfile: StringUtils.cs $
-* $Revision: 2 $ 
-* $Header: /trunk/Arena.Custom.Cccev/Arena.Custom.Cccev.DataUtils/StringUtils.cs   2   2010-01-27 10:22:48-07:00   JasonO $
+* $Revision: 4 $ 
+* $Header: /trunk/Arena.Custom.Cccev/Arena.Custom.Cccev.DataUtils/StringUtils.cs   4   2010-11-30 15:17:31-07:00   nicka $
 * 
 * $Log: /trunk/Arena.Custom.Cccev/Arena.Custom.Cccev.DataUtils/StringUtils.cs $
+*  
+*  Revision: 4   Date: 2010-11-30 22:17:31Z   User: nicka 
+*  Added Jason's handy TruncateTitle string utility. 
+*  
+*  Revision: 3   Date: 2010-08-04 21:35:58Z   User: JasonO 
+*  Adding extension method to determine whether a list of intergers is valid 
 *  
 *  Revision: 2   Date: 2010-01-27 17:22:48Z   User: JasonO 
 *  
@@ -33,20 +39,80 @@ namespace Arena.Custom.Cccev.DataUtils
     /// </summary>
     public static class StringUtils
     {
+		/// <summary>
+		/// Intelligently truncates a string by words -- useful when truncating titles.
+		/// </summary>
+		/// <param name="title">The text to truncate</param>
+		/// <param name="length">The maximum length at which to truncate the string</param>
+		/// <returns>Returns the truncated title </returns>
+		public static string GetTruncateTitle( string title, int length )
+		{
+			string retval = "";
+			string[] titleArray = title.Split( new char[] { ' ' } );
+
+			foreach ( string word in titleArray )
+			{
+				if ( ( retval.Length + word.Length + 1 ) <= length )
+				{
+					retval += " " + word;
+				}
+				else
+				{
+					break;
+				}
+			}
+
+			return retval;
+		}
+
         /// <summary>
-        /// Truncates a string	
+        /// Truncates a string and appends a '...'
         /// </summary>
         /// <param name="value">The string to truncate</param>
         /// <param name="length">The length at which to truncate the string</param>
-        /// <returns>Returns the truncated string</returns>
+        /// <returns>Returns the truncated string with '...' appended</returns>
         public static string GetTruncatedString(string value, int length)
         {
-            if (value.Length > length)
-            {
-                return value.Substring(0, length - 2) + "...";
-            }
+			return GetTruncatedString( value, length, "..." );
+        }
 
-            return value;
+		/// <summary>
+		/// Truncates a string	
+		/// </summary>
+		/// <param name="value">The string to truncate</param>
+		/// <param name="length">The length at which to truncate the string</param>
+		/// <param name="append">The string to append to the end of the returned value</param>
+		/// <returns>Returns the truncated string</returns>
+		public static string GetTruncatedString( string value, int length, string append )
+		{
+			if ( value.Length > length )
+			{
+				return value.Substring( 0, length - 2 ) + append;
+			}
+
+			return value;
+		}
+
+        /// <summary>
+        /// Will attempt to determine if a string is a valid list of intergers
+        /// </summary>
+        /// <param name="idList">string to parse</param>
+        /// <returns>true/false depending on outcome of attempted parsing to int</returns>
+        public static bool IsValidIDList(this string idList)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(idList))
+                {
+                    idList.SplitAndConvertTo<int>(new[] { ',', ' ', ';', '|' }, Convert.ToInt32);
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>
